@@ -42,7 +42,7 @@ Secrets data is passed via environment variables. Here is what can be configured
 |SENDGRID_API_KEY|Configure your sendgrid token to receive email alerts|
 |SENDGRID_SENDER_NAME|Your sendgrid verified user's name [See: Sendgrid sender identity](https://sendgrid.com/docs/for-developers/sending-email/sender-identity/)|
 |SENDGRID_SENDER_EMAIL|Your sendgrid verified user's email address  [See also: Sendgrid sender identity](https://sendgrid.com/docs/for-developers/sending-email/sender-identity/)|
-|WPVULNDB_API_KEY|Configure your wpvulndb token for richer plugin vulnerability detection, you can get one free [here](https://wpvulndb.com/users/sign_up)|
+|WPVULNDB_API_KEY|Configure your wpvulndb token for richer wordpress vulnerability detection, you can get one free [here](https://wpvulndb.com/users/sign_up)|
 
 The following flags exist to help you configure the application:
 
