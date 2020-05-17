@@ -16,7 +16,7 @@ If a regex is matched against a particular attribute, the alert is triggered.
 
 # Usage
 
-Telescope is a binary designed to be run in a container ([modularsystems/telescope:latest](https://hub.docker.com/modularsystems/telescope)), so you can either run the container, or deploy it with your orchestrator of choice.
+Telescope is a binary designed to be run in a container ([modularsystems/telescope:latest](https://hub.docker.com/r/modularsystems/telescope)), so you can either run the container, or deploy it with your orchestrator of choice.
 
 Here are some examples on how you can run it:
 
@@ -38,7 +38,7 @@ alerts:
 Secrets data is passed via environment variables. Here is what can be configured by environment variables:
 
 |Environment Variable|Description|
-|-|-|-|
+|-|-|
 |SENDGRID_API_KEY|Configure your sendgrid token to receive email alerts|
 |SENDGRID_SENDER_NAME|Your sendgrid verified user's name [See: Sendgrid sender identity](https://sendgrid.com/docs/for-developers/sending-email/sender-identity/)|
 |SENDGRID_SENDER_EMAIL|Your sendgrid verified user's email address  [See also: Sendgrid sender identity](https://sendgrid.com/docs/for-developers/sending-email/sender-identity/)|
