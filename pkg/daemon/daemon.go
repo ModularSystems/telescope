@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/modularsystems/telescope/pkg/alert"
 	"github.com/modularsystems/telescope/pkg/conf"
@@ -19,11 +20,9 @@ type Daemon struct {
 	Scans  []scan.Scanner
 }
 
-// Start loads everything into memory and starts our daemon
-func (d *Daemon) Start() {
-	d.Logger.Printf("Configuring scans\t")
+// Load sets up the Daemon for the main loop
+func (d *Daemon) Load() {
 	if d.Debug {
-		d.Logger.Printf("Loaded Configuration\n")
 		d.Logger.Printf("Loaded Alerts: %s\n", d.Config.Alerts)
 		d.Logger.Printf("Loaded Scans: %s\n", d.Config.Scans)
 	}
@@ -53,7 +52,9 @@ func (d *Daemon) Start() {
 		}
 	}
 
-	d.Logger.Printf("Configuring alerts\t")
+	if d.Debug {
+		d.Logger.Printf("Configuring alerts\t")
+	}
 	for _, a := range d.Config.Alerts {
 		var toName, toEmail string
 		if d.Debug {
@@ -83,5 +84,20 @@ func (d *Daemon) Start() {
 			emailAlert := alert.NewEmailAlert(fromName, fromEmail, toName, toEmail, a.Config["subject"], a.Config["message"])
 			d.Alerts = append(d.Alerts, emailAlert)
 		}
+	}
+	if d.Debug {
+		d.Logger.Printf("Daemon configuration loaded")
+	}
+
+}
+
+// Start loads everything into memory and starts our daemon
+func (d *Daemon) Start() {
+	if d.Debug {
+		d.Logger.Printf("Daemon started")
+	}
+	tick := time.Tick(1 * )
+	for {
+
 	}
 }

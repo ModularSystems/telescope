@@ -28,12 +28,25 @@ var (
 			}
 
 			logger := log.New(os.Stdout, fmt.Sprintf("%s: ", time.Now().Format(time.RFC3339)), log.LUTC)
-
+			if debug {
+				logger.Printf("✔️ Configuration file loaded from %s\n", configFile)
+				if os.Getenv("SENDGRID_API_KEY") != "" && os.Getenv("SENDGRID_SENDER_NAME") != "" && os.Getenv("SENDGRID_SENDER_EMAIL") != "" {
+					logger.Printf("✔️ Sendgrid enabled\n")
+				} else {
+					logger.Printf("✖ Sendgrid disabled\n")
+				}
+				if os.Getenv("WPVULNDB_API_KEY") != "" {
+					logger.Printf("✔️ WPVulnDB lookups enabled\n")
+				} else {
+					logger.Printf("✖ WPVulnDB lookups disabled\n")
+				}
+			}
 			daemon := daemon.Daemon{
 				Config: config,
 				Debug:  debug,
 				Logger: logger,
 			}
+			daemon.Load()
 			daemon.Start()
 		},
 	}
