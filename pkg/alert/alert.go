@@ -12,7 +12,7 @@ import (
 
 // Alert is an interface declaration for all types of alerts.
 type Alert interface {
-	Send() (string, error)
+	Send() (string, []error)
 }
 
 // EmailAlert represents the data model for any email alert. With this model, we should be able to

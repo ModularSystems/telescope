@@ -1,4 +1,4 @@
-package scanner
+package scan
 
 import (
 	"bufio"
@@ -15,9 +15,11 @@ import (
 
 // WPScan represents the data model of a WPScan
 type WPScan struct {
+	Error     error
+	Name      string
 	Stdout    string
 	Stderr    string
-	Error     error
+	Time      string // Used to invoke after a certain time
 	Timestamp time.Time
 	URI       string
 }
@@ -69,8 +71,10 @@ func (w *WPScan) Scan() {
 
 // HTMLScan represents the data model of an HTML Scan
 type HTMLScan struct {
-	HTML      string
 	Error     error
+	HTML      string
+	Name      string
+	Time      string
 	Timestamp time.Time
 	URI       string
 }
@@ -83,12 +87,14 @@ func (h *HTMLScan) Scan() {
 	res, err := http.Get(h.URI)
 	if err != nil {
 		h.Error = err
+		return
 	}
 
 	data, err := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 	if err != nil {
 		h.Error = err
+		return
 	}
 	h.HTML = string(data)
 }

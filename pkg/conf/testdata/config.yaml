@@ -1,0 +1,18 @@
+alerts:
+  - name: Generic Alert
+    type: email
+    config:
+      sendTo: "Some One somebody@gmail.com, Another One anotherone@gmail.com"
+      subject: "Generic subject"
+      message: |
+        <h1>It was the best of times %s</h1><br>
+        It was the worst of times: %s<br>
+
+scans:
+  - name: Generic Scanner
+    type: HTMLScan
+    time: "T13:00:00Z"
+    uris:
+    - "https://modularsystems.io"
+    alerts:
+    - Generic Alert

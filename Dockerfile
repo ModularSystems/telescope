@@ -1,22 +1,18 @@
-############################
-# STEP 1 build executable binary
-############################
 FROM golang:alpine AS builder
-# Install git.
-# Git is required for fetching the dependencies.
-RUN apk update && apk add --no-cache git
-WORKDIR $GOPATH/src/github.com/modularsystems/telescope
 
+RUN apk update && apk add --no-cache \
+ make \
+ gcc \
+ libc-dev
+WORKDIR $GOPATH/src/github.com/modularsystems/telescope
 COPY . .
 # Fetch dependencies w/ go mod
 RUN go mod download
 # Build the binary.
-RUN make test
-RUN make build
+RUN go build -o /go/bin/telescope ./cmd/telescope/main.go
 
-############################
-# STEP 2 build a small image w/ Ruby and our wpscan binary
-############################
+####################################################################
+
 FROM alpine:3
 
 RUN apk -U add \
