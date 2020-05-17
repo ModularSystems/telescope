@@ -1,9 +1,13 @@
 ![](./telescope.png)
 
-Telescope
+# Telescope
+
+![release: alpha](https://img.shields.io/badge/Release-alpha-yellow)
 ===
 
-Telescope is used to monitor websites. Much like a telescope, it can crudely see things from far away. It can watch for new vulnerabilities, unexpected changes, outages, and more. It integrates with Sendgrid to send email alerts. Future releases aim to support integrations for:
+This project is under active development towards a stable release. Warning: `master` is subject to breaking changes.
+
+Telescope used to monitor websites. Much like a telescope, it can crudely see things from far away. It can watch for new vulnerabilities, unexpected changes, outages, and more. It integrates with Sendgrid to send email alerts. Future releases aim to support integrations for:
 
 - Slack
 - Text via Email

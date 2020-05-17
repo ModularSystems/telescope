@@ -6,30 +6,29 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Scan represents the data model for a scanner's configuration.
-type Scan struct {
-	Alert  []string          `yaml:"alert"`  // A list of alert's names to check
+// ScanConfiguration represents the data model for a scanner's configuration.
+type ScanConfiguration struct {
+	Alerts []string          `yaml:"alerts"` // A list of alert's names to check
 	Config map[string]string `yaml:"config"` // An optional config mapping
-	Name   string            `yaml:"name"`
-	Time   string            `yaml:"time"` // The ISO 8061 Time string for when we want the Scan to happen
-	Type   string            `yaml:"type"`
-	URIs   []string          `yaml:"uris"`
+	Name   string            `yaml:"name"`   // An identifier for the Scan
+	Type   string            `yaml:"type"`   // Triggers the behavior of the scan
+	URIs   []string          `yaml:"uris"`   // The network endpoint(s) we want to trigger the scan for
 }
 
-// Alert represents the data model from an alert configuration. This should map closely to the alert pkg object
-type Alert struct {
-	Attribute string            `yaml:"attribute"`
-	Config    map[string]string `yaml:"config"`
-	Name      string            `yaml:"name"`
-	Regex     string            `yaml:"regex"`
-	Type      string            `yaml:"type"`
-	URIs      []string          `yaml:"uris"`
+// AlertConfiguration represents the data model from an alert configuration. This should map closely to the alert pkg object
+type AlertConfiguration struct {
+	Attribute string            `yaml:"attribute"` // The attribute we want to perform a regex against
+	Config    map[string]string `yaml:"config"`    // User defined configuration options
+	Name      string            `yaml:"name"`      // An identifier for the Alert
+	Regex     string            `yaml:"regex"`     // Regex pattern matching to be applied against attribute
+	Type      string            `yaml:"type"`      // The type of alerting to be performed (email, text, etc)
+	URIs      []string          `yaml:"uris"`      // The network endpoint(s) relevant to the alert
 }
 
 // Config represents the data model for the configuration file loaded into telescope
 type Config struct {
-	Alerts []Alert
-	Scans  []Scan
+	Alerts []AlertConfiguration
+	Scans  []ScanConfiguration
 }
 
 // Load unmarshals a file into our configuration struct

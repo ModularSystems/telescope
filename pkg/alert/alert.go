@@ -20,23 +20,25 @@ type Alert interface {
 type EmailAlert struct {
 	From      *mail.Email
 	Message   string
+	Name      string
 	Subject   string
 	Timestamp time.Time
 	To        []*mail.Email
 }
 
 // NewEmailAlert is a factory function for producing email alert objects.
-func NewEmailAlert(fromName, fromEmail, toName, toEmail, subject, html string) *EmailAlert {
+func NewEmailAlert(name, fromName, fromEmail, toName, toEmail, subject, html string) *EmailAlert {
 	t := time.Now()
 	from := mail.NewEmail(fromName, fromEmail)
 	to := mail.NewEmail(toName, toEmail)
 
 	return &EmailAlert{
 		From:      from,
-		To:        []*mail.Email{to},
-		Timestamp: t,
-		Subject:   subject,
 		Message:   html,
+		Name:      name,
+		Subject:   subject,
+		Timestamp: t,
+		To:        []*mail.Email{to},
 	}
 }
 

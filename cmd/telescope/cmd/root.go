@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/modularsystems/telescope/pkg/conf"
 	"github.com/modularsystems/telescope/pkg/daemon"
@@ -27,7 +26,7 @@ var (
 				fmt.Println("debug logging enabled")
 			}
 
-			logger := log.New(os.Stdout, fmt.Sprintf("%s: ", time.Now().Format(time.RFC3339)), log.LUTC)
+			logger := log.New(os.Stdout, "", log.LstdFlags)
 			if debug {
 				logger.Printf("✔️ Configuration file loaded from %s\n", configFile)
 				if os.Getenv("SENDGRID_API_KEY") != "" && os.Getenv("SENDGRID_SENDER_NAME") != "" && os.Getenv("SENDGRID_SENDER_EMAIL") != "" {
@@ -41,10 +40,14 @@ var (
 					logger.Printf("✖ WPVulnDB lookups disabled\n")
 				}
 			}
-			daemon := daemon.Daemon{
-				Config: config,
-				Debug:  debug,
-				Logger: logger,
+			store := &daemon.InMemoryStore{
+				CacheLength: 100,
+			}
+			daemon := &daemon.Daemon{
+				Config:  config,
+				Debug:   debug,
+				Logger:  logger,
+				Storage: store,
 			}
 			daemon.Load()
 			daemon.Start()
@@ -62,7 +65,6 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVar(&configFile, "config", "/etc/telescope/config.yaml", "config file (default is /etc/telescope/config.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "enable debug logging")
-
 }
 
 func initConfig() {
