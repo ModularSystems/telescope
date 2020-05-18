@@ -131,16 +131,16 @@ func (d *Daemon) Start() {
 			// Iterate through the slice of Scanners
 			for _, s := range v {
 				var lastRun time.Time
-
-				if d.Storage.SizeOf(s.GetName()) > 0 {
-					lastScan, err := d.Storage.Last(k)
+				cacheSize := d.Storage.SizeOf(s.GetURI())
+				if cacheSize > 0 {
+					lastScan, err := d.Storage.Last(s.GetURI())
 					if err != nil {
 						d.Logger.Printf("Error: failed to get last scan for %s\n", k)
-						continue
+						// continue
 					}
 					lastRun = lastScan.GetTimestamp()
 				}
-				if s.IsEligible(lastRun) {
+				if cacheSize == 0 || s.IsEligible(lastRun) {
 					if d.Debug {
 						d.Logger.Printf("%s eligible for run, scanning now\n", s.GetName())
 					}

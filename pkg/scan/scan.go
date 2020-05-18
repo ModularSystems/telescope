@@ -71,9 +71,9 @@ func (w *WPScan) IsEligible(lastRun time.Time) bool {
 	}
 	durationSinceLastRun := time.Now().Sub(lastRun)
 	if w.Debug {
-		w.Logger.Printf("Duration since last run: %v\tScan every: %v\n", w.ScanName, w.Every)
+		w.Logger.Printf("Duration since last run: %v\tScan every: %v\n", durationSinceLastRun, w.Every)
 	}
-	if durationSinceLastRun < w.Every {
+	if durationSinceLastRun > w.Every {
 		return true
 	}
 
