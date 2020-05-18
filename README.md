@@ -9,8 +9,8 @@ This project is under active development towards a stable release. Warning: `mas
 
 Telescope used to monitor websites. Much like a telescope, it can crudely see things from far away. It can watch for new vulnerabilities, unexpected changes, outages, and more. It integrates with Sendgrid to send email alerts. Future releases aim to support integrations for:
 
-- Slack
-- Text via Email
+- [ ] Slack
+- [ ] Text via Email
 - Twillio (Text)
 - Twillio (Call)
 - Configurable webhook
@@ -34,7 +34,6 @@ alerts:
   - name: Vulnerability Report
 
 ```
-
 
 
 # Configuration:
@@ -87,3 +86,14 @@ alerts:
     regex: "Plugin.Vulernability.Discovered"
     timed: "13:00 UTC"
 ```
+
+# Backlog
+
+- [ ] Refactor daemon loop to iterate through urls instead of two separate loops iterating through all scans and alerts. Using Urls could allow o(n) to be reduced to the minimal amount of operations but also reduce work. This can be done by scanning once, then save the output to all relative jobs.
+- [ ] Adequate testing is missing:
+  - [ ] mock an http server for network scan testing
+  - [ ] add alert testing where possible
+  - [ ] stub out configuration tests to catch edge cases, such as sendTo parsing
+- [ ] Documentation can be improved
+- [ ] Redesign data models. I suspect there are better ways to organize this data
+- [ ] Export basic metrics like time per cycle, requests handled, error rate, etc

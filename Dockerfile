@@ -1,13 +1,14 @@
 FROM golang:alpine AS builder
 
-RUN apk update && apk add --no-cache \
- make \
- gcc \
- libc-dev
+# BUG - https://github.com/golang/go/issues/27303
+ENV CGO_ENABLED 0
+
 WORKDIR $GOPATH/src/github.com/modularsystems/telescope
 COPY . .
 # Fetch dependencies w/ go mod
 RUN go mod download
+# catch test failures on build
+RUN go test -v ./...
 # Build the binary.
 RUN go build -o /go/bin/telescope ./cmd/telescope/main.go
 
@@ -22,7 +23,7 @@ RUN apk -U add \
     libffi-dev \
     zlib-dev
 RUN gem install wpscan
-RUN apk del alpine-sdk
+RUN apk del alpine-sdk ruby-dev libffi-dev zlib-dev
 
 # Copy our static executable.
 COPY --from=builder /go/bin/telescope /go/bin/telescope

@@ -6,4 +6,4 @@ docker:
 	docker build -t modularsystems/telescope:latest .
 
 test:
-	go test -v pkg/scan/*
+	go test -v ./...

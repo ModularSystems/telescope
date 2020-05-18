@@ -73,6 +73,9 @@ func (d *Daemon) Load() {
 			d.Logger.Printf("Loading alert: %s\t", a.Name)
 		}
 		if a.Type == "email" {
+			// TODO - refactor this to better handle malformed strings
+			//  ex: "My Name my@name.com, My Friend my@friend.com" would cause this to evaluate to len(tmp) == 4 thus breaking this logic if we wanted to
+			//    page more than 1 person.
 			sendToCommaDelim := strings.Split(a.Config["sendTo"], ",")
 			for _, sendTo := range sendToCommaDelim {
 				tmp := strings.Split(sendTo, " ")
@@ -94,7 +97,11 @@ func (d *Daemon) Load() {
 				continue
 			}
 			// TODO: Check that the config is properly constructed here
+			// TODO: Should be able to better deserialize this data so that this function call isn't so ridiculous
 			emailAlert := alert.NewEmailAlert(a.Name, fromName, fromEmail, toName, toEmail, a.Config["subject"], a.Config["message"])
+			emailAlert.Attribute = a.Attribute
+			emailAlert.Regex = a.Regex
+			emailAlert.URIs = a.URIs
 			d.Alerts[a.Name] = append(d.Alerts[a.Name], emailAlert)
 		}
 	}
@@ -114,25 +121,80 @@ func (d *Daemon) Start() {
 		select {
 		case <-tick:
 			// Iterate through scans' keys, and loop through each set of associated scanners. Each scanner should determine if it should be executed
+			if d.Debug {
+				d.Logger.Printf("Evaluating scans")
+			}
 			for k, v := range d.Scans {
-				if d.Debug {
-					d.Logger.Printf("Evaluating: %s\n", k)
-				}
 				// Iterate through the slice of Scanners
 				for _, s := range v {
 					var lastRun time.Time
+
 					if d.Storage.SizeOf(s.GetName()) > 0 {
-						lastRun = d.Storage.Last(s).GetTimestamp()
+						lastScan, err := d.Storage.Last(k)
+						if err != nil {
+							d.Logger.Printf("Error: failed to get last scan for %s\n", k)
+							continue
+						}
+						lastRun = lastScan.GetTimestamp()
 					}
 					if s.IsEligible(lastRun) {
 						if d.Debug {
 							d.Logger.Printf("%s eligible for run, scanning now\n", s.GetName())
 						}
 						s.Scan()
+						if d.Debug {
+							d.Logger.Printf("%s: Scan output: %s\n", s.GetTimestamp(), s.GetOutput())
+						}
 						d.Storage.Save(s)
 					}
 				}
+			} // end of d.Scans loop
+
+			if d.Debug {
+				if len(d.Alerts) == 0 {
+					d.Logger.Printf("No alerts loaded\n")
+				} else {
+					d.Logger.Printf("Evaluating alerts:\t")
+				}
 			}
+			for _, v := range d.Alerts {
+				for _, a := range v {
+					if d.Debug {
+						d.Logger.Printf("%s\t", a.GetName())
+					}
+					// Get last scan for each URI
+					// evaluate its output vs the alert's regex
+					// trigger alert.Send() if the alert evaluates to true
+					for _, uri := range a.GetURIs() {
+						lastScan, err := d.Storage.Last(uri)
+						if err != nil {
+							if d.Debug {
+								d.Logger.Printf("\n")
+							}
+							d.Logger.Printf("Error: failed to get the last scan for %s:\t%s\n", uri, err.Error())
+						}
+
+						if a.Evaluate(lastScan.GetOutput()) {
+							if d.Debug {
+								d.Logger.Printf("✔️ %s\t%s\n", a.GetName(), uri)
+							}
+							res, errs := a.Send()
+							if len(errs) > 0 {
+								for _, err := range errs {
+									d.Logger.Printf("Error: alert %s for %s failed to send:\t%s\n", a.GetName(), uri, err.Error())
+								}
+							}
+							if d.Debug {
+								d.Logger.Printf("Email sent: %s\n", res)
+							}
+						} else {
+							if d.Debug {
+								d.Logger.Printf("✖ %s\n", a.GetName())
+							}
+						}
+					} // end of URIs for loop
+				} // end of alert loop
+			} // end of d.Alerts loop
 		}
 	}
 }

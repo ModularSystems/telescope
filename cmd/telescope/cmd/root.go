@@ -35,13 +35,15 @@ var (
 					logger.Printf("✖ Sendgrid disabled\n")
 				}
 				if os.Getenv("WPVULNDB_API_KEY") != "" {
-					logger.Printf("✔️ WPVulnDB lookups enabled\n")
+					logger.Printf("✔️ WPVulnDB lookups enabled \n")
 				} else {
 					logger.Printf("✖ WPVulnDB lookups disabled\n")
 				}
 			}
 			store := &daemon.InMemoryStore{
 				CacheLength: 100,
+				Debug:       debug,
+				Logger:      logger,
 			}
 			daemon := &daemon.Daemon{
 				Config:  config,
