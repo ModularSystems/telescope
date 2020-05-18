@@ -14,16 +14,25 @@ RUN go build -o /go/bin/telescope ./cmd/telescope/main.go
 
 ####################################################################
 
-FROM alpine:3
+FROM ruby:2.6.3-alpine
 
+# You can see the requirements for wpscan in their upstream Dockerfile
+# https://github.com/wpscanteam/wpscan/blob/master/Dockerfile
 RUN apk -U add \
-    alpine-sdk \
+    git \
+    gcc \
+    libcurl \
+    libffi-dev \
+    libxml2 \
+    make \
+    musl-dev \
     ruby \
     ruby-dev \
-    libffi-dev \
+    procps \
+    sqlite-dev \
+    sqlite-libs \
     zlib-dev
-RUN gem install wpscan
-RUN apk del alpine-sdk ruby-dev libffi-dev zlib-dev
+RUN gem install --verbose --backtrace --debug wpscan
 
 # Copy our static executable.
 COPY --from=builder /go/bin/telescope /go/bin/telescope

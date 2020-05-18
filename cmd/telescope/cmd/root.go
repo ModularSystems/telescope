@@ -32,12 +32,12 @@ var (
 				if os.Getenv("SENDGRID_API_KEY") != "" && os.Getenv("SENDGRID_SENDER_NAME") != "" && os.Getenv("SENDGRID_SENDER_EMAIL") != "" {
 					logger.Printf("✔️ Sendgrid enabled\n")
 				} else {
-					logger.Printf("✖ Sendgrid disabled\n")
+					logger.Printf("✖\t Sendgrid disabled\n")
 				}
 				if os.Getenv("WPVULNDB_API_KEY") != "" {
-					logger.Printf("✔️ WPVulnDB lookups enabled \n")
+					logger.Printf("✔️\t WPVulnDB lookups enabled \n")
 				} else {
-					logger.Printf("✖ WPVulnDB lookups disabled\n")
+					logger.Printf("✖\t WPVulnDB lookups disabled\n")
 				}
 			}
 			store := &daemon.InMemoryStore{

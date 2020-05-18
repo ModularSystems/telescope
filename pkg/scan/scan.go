@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -26,8 +27,10 @@ type Scanner interface {
 
 // WPScan represents the data model of a WPScan
 type WPScan struct {
+	Debug     bool
 	Error     error
 	Every     time.Duration
+	Logger    *log.Logger
 	ScanName  string
 	Stdout    string
 	Stderr    string
@@ -63,16 +66,22 @@ func (w *WPScan) GetTimestamp() time.Time {
 
 // IsEligible determines scan eligibility based on the current time
 func (w *WPScan) IsEligible(lastRun time.Time) bool {
+	if w.Debug {
+		w.Logger.Printf("Evaluating %s\tLast run: %v\t", w.ScanName, lastRun)
+	}
 	durationSinceLastRun := time.Now().Sub(lastRun)
-
-	if durationSinceLastRun > w.Every {
+	if w.Debug {
+		w.Logger.Printf("Duration since last run: %v\tScan every: %v\n", w.ScanName, w.Every)
+	}
+	if durationSinceLastRun < w.Every {
 		return true
 	}
+
 	return false
 }
 
 // Scan runs wpscan and saves stdout/stderr output
-// Scan looks for WPVULNAPITOKEN in the environment variables, and if it's there, enables
+// Scan looks for WPVULNDB_API_KEY in the environment variables, and if it's there, enables
 // wpvulndb lookups, which is recommended
 func (w *WPScan) Scan() bool {
 	t := time.Now()
@@ -83,35 +92,41 @@ func (w *WPScan) Scan() bool {
 	}
 
 	// compose args
-	args := fmt.Sprintf("wpscan --url %s", w.URI)
-	if os.Getenv("WPVULNDB_API_KEY") != "" {
-		args += fmt.Sprintf(" --api-token $WPVULNDB_API_KEY")
+	if w.Debug {
+		if os.Getenv("WPVULNDB_API_KEY") != "" {
+			w.Logger.Printf("✔️\t WPVulnDB lookups enabled \n")
+		} else {
+			w.Logger.Printf("✖\t WPVulnDB lookups disabled\n")
+		}
 	}
-
 	// get `wpscan` executable path
 	wpscanBinary, err := exec.LookPath("wpscan")
 	if err != nil {
 		w.Error = err
 		return false
 	}
-
-	outBuf := &bytes.Buffer{}
-	errBuf := &bytes.Buffer{}
-	outWriter := bufio.NewWriter(outBuf)
-	errWriter := bufio.NewWriter(errBuf)
-
-	splitArgs := strings.Split(args, " ")
-	cmd := &exec.Cmd{
-		Path:   wpscanBinary,
-		Args:   splitArgs,
-		Stdout: outWriter,
-		Stderr: errWriter,
+	args := fmt.Sprintf("%s --url %s", wpscanBinary, w.URI)
+	// TODO - Get this tp pick up the environment variable.
+	if os.Getenv("WPVULNDB_API_KEY") != "" {
+		// args += fmt.Sprintf(" --api-token $WPVULNDB_API_KEY")
+		args += fmt.Sprintf(" --api-token %s", os.Getenv("WPVULNDB_API_KEY"))
 	}
 
+	errBuf := &bytes.Buffer{}
+	errWriter := bufio.NewWriter(errBuf)
+	outBuf := &bytes.Buffer{}
+	outWriter := bufio.NewWriter(outBuf)
+
+	splitArgs := strings.Split(args, " ")
+
+	cmd := exec.Command(wpscanBinary, splitArgs...)
+	cmd.Stderr = errWriter
+	cmd.Stdout = outWriter
+
 	w.Error = cmd.Run()
-	w.Stdout = outBuf.String()
 	w.Stderr = errBuf.String()
-	if w.Error != nil {
+	w.Stdout = outBuf.String()
+	if w.Error != nil || w.Stderr != "" {
 		return false
 	}
 	return true
@@ -119,8 +134,10 @@ func (w *WPScan) Scan() bool {
 
 // HTMLScan represents the data model of an HTML Scan
 type HTMLScan struct {
+	Debug     bool
 	Error     error
 	Every     time.Duration
+	Logger    *log.Logger
 	HTML      string
 	ScanName  string
 	Time      string
